@@ -7,6 +7,20 @@ def simMenu():
     print('2. Budget planner and monthly expense analyser')
     print('0. Exit')
 
+# Portfolio class to hold multiple stocks and their quantities
+class Portfolio:
+    def __init__(self, name):
+        self.name = name
+        self.stocks = {} # Dictionary to hold stock objects and quantities
+
+    def addStock(self, stock, quantity):
+        # If the stock already exists the quantity is updated
+        if stock.name in self.stocks:
+            self.stocks[stock.name]["quantity"] += quantity
+        # New stock is added to the portfolio
+        else:
+            self.stocks[stock.name] = {"stock": stock, "quantity": quantity}
+
 # Stock class to hold stocks with their name and price
 class Stock:
     def __init__(self, name, price):
@@ -23,33 +37,18 @@ class Stock:
         
         self.history.append(self.price)
 
+    # Function to return the current price of the stock
     def getValue(self):
         return self.price
     
+    # Function to return the price history of the stock
     def getHistory(self):
         return self.history
 
-# Portfolio class to hold multiple stocks and their quantities
-class Portfolio:
-    def __init__(self, name):
-        self.name = name
-        self.stocks = {} # Dictionary to hold stock objects and quantities
-
-    def addStock(self, stock, quantity):
-        # If the stock already exists the quantity is updated
-        if stock.name in self.stocks:
-            self.stocks[stock.name]["quantity"] += quantity
-        # New stock is added to the portfolio
-        else:
-            self.stocks[stock.name] = {"stock": stock, "quantity": quantity}
-
-        def getAveragePrice(self, stockName):
-            if stockName in self.stocks:
-                stock = self.stocks[stockName]["stock"]
-                return sum(stock.getHistory()) / len(stock.getHistory())
-            else:
-                return None
-
+# Function that returns a portfolio object
+def createPortfolio():
+    portfolioName = input('Enter Portfolio Name: ').strip().upper()
+    return Portfolio(portfolioName)
 
 # Function that returns a stock object
 def createStock():
@@ -57,15 +56,14 @@ def createStock():
     stockPrice = float(input('Enter Stock Price: '))
     return Stock(stockName, stockPrice)
 
-# Function that returns a portfolio object
-def createPortfolio():
-    portfolioName = input('Enter Portfolio Name: ').strip().upper()
-    return Portfolio(portfolioName)
-
 def addStockToPortfolio(portfolio):
     stock = createStock()
     quantity = int(input('Enter Quantity: '))
     portfolio.addStock(stock, quantity)
+
+def getDays():
+    days = int(input('Enter number of days to simulate: '))
+    return days
 
 def simulateStockPriceChanges(portfolio, getDays):
     days = getDays()
@@ -78,9 +76,30 @@ def simulateStockPriceChanges(portfolio, getDays):
             print(f'{stock.name}: {stock.getValue():.2f} (Quantity: {quantity})')
         print('')
 
-def getDays():
-    days = int(input('Enter number of days to simulate: '))
-    return days
+def printAveragePrice(portfolio):
+    for stockName, data in portfolio.stocks.items():
+        stock = data["stock"]
+        averagePrice = sum(stock.getHistory()) / len(stock.getHistory())
+        print(f'{stock.name}: {averagePrice:.2f}')
+
+def printMaxPrice(portfolio):
+    for stockName, data in portfolio.stocks.items():
+        stock = data["stock"]
+        maxPrice = max(stock.getHistory())
+        print(f'{stock.name}: {maxPrice:.2f}, Day: {stock.getHistory().index(maxPrice) + 1}')
+    
+def printMinPrice(portfolio):
+    for stockName, data in portfolio.stocks.items():
+        stock = data["stock"]
+        minPrice = min(stock.getHistory())
+        print(f'{stock.name}: {minPrice:.2f}, Day: {stock.getHistory().index(minPrice) + 1}')
+
+def printAnalyticsOptions():
+    print('Analytics Options:')
+    print('1. Average Price')
+    print('2. Maximum Price')
+    print('3. Minimum Price')
+    print('0. Back to Main Menu')
 
 def stockPortfolioTracker():
     portfolio = createPortfolio()
@@ -92,6 +111,21 @@ def stockPortfolioTracker():
         elif cont == 'n':
             break
     simulateStockPriceChanges(portfolio, getDays)
+
+    printAnalyticsOptions()
+    while True:
+        choice = input('Enter your choice: ')
+        if choice == '1':
+            printAveragePrice(portfolio)
+        elif choice == '2':
+            printMaxPrice(portfolio)
+        elif choice == '3':
+            printMinPrice(portfolio)
+        elif choice == '0':
+            break
+        else:
+            print('Invalid choice.')
+            print('')
 
 def main():
     while True:
