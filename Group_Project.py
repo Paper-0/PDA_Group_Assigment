@@ -48,52 +48,59 @@ class Stock:
 # Function that returns a portfolio object
 def createPortfolio():
     portfolioName = input('Enter Portfolio Name: ').strip().upper()
-    return Portfolio(portfolioName)
+    return Portfolio(portfolioName) # Returns portfolio object 
 
 # Function that returns a stock object
 def createStock():
     stockName = input('Enter Stock Name: ').strip().upper()
     stockPrice = float(input('Enter Stock Price: '))
-    return Stock(stockName, stockPrice)
+    return Stock(stockName, stockPrice) # Returns stock object
 
+# Function to add a stock to the portfolio
 def addStockToPortfolio(portfolio):
-    stock = createStock()
+    stock = createStock() # Create a stock object
     quantity = int(input('Enter Quantity: '))
-    portfolio.addStock(stock, quantity)
+    portfolio.addStock(stock, quantity) # Add the stock to the portfolio
 
+# Get number of days to simulate stock price changes
 def getDays():
     days = int(input('Enter number of days to simulate: '))
-    return days
+    return days # Returns the number of days
 
+# Function to simulate stock price changes over a number of days
 def simulateStockPriceChanges(portfolio, getDays):
-    days = getDays()
+    days = getDays() 
     for day in range(days):
         print(f'Day {day + 1}:')
-        for stockName, data in portfolio.stocks.items():
+        for stockName, data in portfolio.stocks.items(): # Prints the current price of each stock in the portfolio
             stock = data["stock"]
             quantity = data["quantity"]
             stock.update_price()
             print(f'{stock.name}: {stock.getValue():.2f} (Quantity: {quantity})')
         print('')
 
+# Prints Average price of each stock in the portfolio
 def printAveragePrice(portfolio):
     for stockName, data in portfolio.stocks.items():
         stock = data["stock"]
         averagePrice = sum(stock.getHistory()) / len(stock.getHistory())
         print(f'{stock.name}: {averagePrice:.2f}')
 
+# Prints the maximum price of each stock in the portfolio and the day it occurred on
 def printMaxPrice(portfolio):
     for stockName, data in portfolio.stocks.items():
         stock = data["stock"]
         maxPrice = max(stock.getHistory())
         print(f'{stock.name}: {maxPrice:.2f}, Day: {stock.getHistory().index(maxPrice) + 1}')
-    
+
+# Prints the minimum price of each stock in the portfolio and the day it occurred on
 def printMinPrice(portfolio):
     for stockName, data in portfolio.stocks.items():
         stock = data["stock"]
         minPrice = min(stock.getHistory())
         print(f'{stock.name}: {minPrice:.2f}, Day: {stock.getHistory().index(minPrice) + 1}')
 
+# Function to print the analytics options for the user to choose from
 def printAnalyticsOptions():
     print('Analytics Options:')
     print('1. Average Price')
@@ -101,6 +108,7 @@ def printAnalyticsOptions():
     print('3. Minimum Price')
     print('0. Back to Main Menu')
 
+# Function to run the stock portfolio tracker simulation
 def stockPortfolioTracker():
     portfolio = createPortfolio()
     while True:
@@ -127,6 +135,7 @@ def stockPortfolioTracker():
             print('Invalid choice.')
             print('')
 
+# Main function to run the program
 def main():
     while True:
         simMenu()
