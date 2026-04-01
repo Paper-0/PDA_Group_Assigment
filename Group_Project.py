@@ -135,6 +135,109 @@ def stockPortfolioTracker():
             print('Invalid choice.')
             print('')
 
+
+budgetHistory = [] 
+
+# Function to get the user's monthly income with input validation
+def getIncome():
+    while True:
+        try:
+            income = float(input("Enter this month income: "))
+            if income <= 0:
+                print("Income must be more than 0")
+                continue
+            return income
+        except ValueError:
+            print("Invalid input, try again.")
+
+# Function to get an expense with its name and amount
+def getExpense():
+    expense_name = input("Enter your expense name: ").strip()
+    while True:
+        try:
+            expense_amt = float(input(f"Enter the amount for '{expense_name}': "))
+            if expense_amt < 0:
+                print("Amount cannot be negative.")
+                continue
+            return {"Name": expense_name, "Amount": expense_amt}
+        except ValueError:
+            print("Invalid input. Please enter a numeric value.")
+
+# Function to add expenses
+def addExpense():
+    expenses = []
+    while True:
+        try:
+            count = int(input("Enter the number of expenses to be added: "))
+            if count <= 0:
+                print("Number must be greater than 0")
+                continue
+            break
+        except ValueError:
+            print("Invalid input.")
+    for i in range(count):
+        expenses.append(getExpense())
+
+    return expenses
+
+# Function to calculate totals
+def calculateTotals(income, expenses):
+    totalExpenses = sum(item["Amount"] for item in expenses)
+    netIncome = income - totalExpenses
+    return totalExpenses, netIncome
+
+# Function to calculate statistics
+def calculateStats(amounts):
+    if len(amounts) == 0:
+        return None
+    stats = {}  
+    stats["mean"] = sum(amounts) / len(amounts)
+    stats["max"] = max(amounts)
+    stats["min"] = min(amounts)
+    stats["count"] = len(amounts)
+    return stats
+
+# Financial analysis
+def analysis(income, totalExpenses, netIncome):
+    print("\nFinancial Analysis")
+    if totalExpenses > income:  
+        print("You are spending more than your income!")
+    elif netIncome > 0:
+        savingsRate = (netIncome / income) * 100
+        print(f"You saved {savingsRate:.2f}% of your income.")
+    else:
+        print("You broke even this month.")
+
+# Display summary
+def displaySummary(income, expenses, total, balance, stats):
+    print("\nMonthly Budget Summary")
+    print(f"Income: {income:.2f}")
+    print("\nExpenses:")
+    for item in expenses:
+        print(f" {item['Name']}: {item['Amount']:.2f}")
+    print(f"\nTotal Expenses: {total:.2f}")
+    print(f"Remaining Balance: {balance:.2f}")
+# stats
+    print("\nStatistics")
+    print(f"Average Expense: {stats['mean']:.2f}")
+    print(f"Highest Expense: {stats['max']:.2f}")
+    print(f"Lowest Expense: {stats['min']:.2f}")
+    print(f"Number of Expenses: {stats['count']}")
+
+# Main budget planner
+def budgetPlanner():
+    print("\nBudget Planner & Expense Analyzer")
+    income = getIncome()
+    expenses = addExpense()
+
+    totalExpenses, netIncome = calculateTotals(income, expenses)
+
+    amounts = [item["Amount"] for item in expenses]
+    stats = calculateStats(amounts)
+
+    displaySummary(income, expenses, totalExpenses, netIncome, stats)
+    analysis(income, totalExpenses, netIncome)
+
 # Main function to run the program
 def main():
     while True:
@@ -143,6 +246,7 @@ def main():
         if choice == '1':
             stockPortfolioTracker()
         elif choice == '2':
+            budgetPlanner()
             break
         elif choice == '0':
             print('Exiting the program...')
