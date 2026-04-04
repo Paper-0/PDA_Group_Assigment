@@ -52,20 +52,33 @@ def createPortfolio():
 
 # Function that returns a stock object
 def createStock():
-    stockName = input('Enter Stock Name: ').strip().upper()
-    stockPrice = float(input('Enter Stock Price: '))
+    try:
+        stockName = input('Enter Stock Name: ').strip().upper()
+        stockPrice = float(input('Enter Stock Price: '))
+    except ValueError:
+        print('Invalid input. Please enter a valid stock price.')
+        return createStock()
     return Stock(stockName, stockPrice) # Returns stock object
 
 # Function to add a stock to the portfolio
 def addStockToPortfolio(portfolio):
-    stock = createStock() # Create a stock object
-    quantity = int(input('Enter Quantity: '))
-    portfolio.addStock(stock, quantity) # Add the stock to the portfolio
+    try:
+        stock = createStock() # Create a stock object
+        quantity = int(input('Enter Quantity: '))
+        portfolio.addStock(stock, quantity) # Add the stock to the portfolio
+    except ValueError:
+        print('Invalid input. Please enter a valid quantity.')
+        addStockToPortfolio(portfolio)
 
 # Get number of days to simulate stock price changes
 def getDays():
-    days = int(input('Enter number of days to simulate: '))
+    try:
+        days = int(input('Enter number of days to simulate: '))
+    except ValueError:
+        print('Invalid input. Please enter a valid number of days.')
+        return getDays()
     return days # Returns the number of days
+
 
 # Function to simulate stock price changes over a number of days
 def simulateStockPriceChanges(portfolio, getDays):
@@ -113,130 +126,124 @@ def stockPortfolioTracker():
     portfolio = createPortfolio()
     while True:
         addStockToPortfolio(portfolio)
-        cont = input('Add another stock? (y/n): ').strip().lower()
-        if cont != 'y' and cont != 'n':
-            print('Invalid input. Please enter "y" or "n".')
-        elif cont == 'n':
-            break
-    simulateStockPriceChanges(portfolio, getDays)
+        while True:
+            cont = input('Add another stock? (y/n): ').strip().lower()
+            if cont == 'y':
+                break
+            elif cont == 'n':
+                simulateStockPriceChanges(portfolio, getDays)
+                while True:
+                    printAnalyticsOptions()
+                    choice = input('Enter your choice: ')
+                    if choice == '1':
+                        printAveragePrice(portfolio)
+                    elif choice == '2':
+                        printMaxPrice(portfolio)
+                    elif choice == '3':
+                        printMinPrice(portfolio)
+                    elif choice == '0':
+                        break
+                    else:
+                        print('Invalid choice.')
+                        print('')
+                return
+            else:
+                print('Invalid input. Please enter "y" or "n".')
 
-    printAnalyticsOptions()
+# Function to input values for the income and expenses 
+def get_float_input(prompt):
     while True:
-        choice = input('Enter your choice: ')
-        if choice == '1':
-            printAveragePrice(portfolio)
-        elif choice == '2':
-            printMaxPrice(portfolio)
-        elif choice == '3':
-            printMinPrice(portfolio)
-        elif choice == '0':
+        try:
+            value = float(input(prompt))
+            if value < 0:
+                print("Value cannot be negative. Try again.")
+            else:
+                return value
+        except ValueError: 
+             print("Invalid input. Please enter a number.")
+
+# Function to input income 
+def add_income():
+    income = get_float_input("Enter your monthly income: $")
+    print("Income was recorded ")
+    return income
+
+# Function to input expenses
+def add_expense(expenses):
+    category = input("Enter expense category (e.g. Food, Rent, Transport): ").strip()
+    if not category:
+        print("Category cannot be empty.")
+        return
+    amount = get_float_input("Enter amount: $")
+    expenses[category] = expenses.get(category, 0) + amount
+    print("Expense was added")
+
+# Function to view expenses
+def view_expenses(expenses):
+    if not expenses:
+        print("No expenses recorded.")
+        return 
+    print("Expense List")
+    for category, amount in expenses.items():
+        print(f"{category}: ${amount:.2f}")
+    print()
+
+# Function to calculate monthly summary 
+def monthly_summary(income, expenses):
+    if income == 0:
+        print("Please add income first")
+        return
+    total_expenses = sum(expenses.values())
+    balance = income - total_expenses
+    print("Monthly Summary")
+    print(f"Total Income: ${income:.2f}")
+    print(f"Total Expenses: ${total_expenses:.2f}")
+    print(f"Remaining Balance: ${balance:.2f}")
+    if balance < 0:
+        print("Warning: You are overspending")
+    else:
+        print()
+
+# Function to analyse expenses 
+def expense_analysis(expenses):
+    if not expenses:
+        print("No expenses to analyze.")
+        return
+    print("Expense Analysis")
+    total = sum(expenses.values())
+    for category, amount in expenses.items():
+        percentage = (amount / total) * 100
+        print(f"{category}: {percentage:.2f}%")
+    print()
+
+# Calling functions 
+def budgetPlanner():
+    expenses = {}
+    income = 0
+    while True:
+        print("Budget Planner")
+        print("1. Add Income")
+        print("2. Add Expense")
+        print("3. View Expenses")
+        print("4. Monthly Summary")
+        print("5. Expense Analysis")
+        print("6. Exit")
+        choice = input("Choose an option: ").strip()
+        if choice == "1":
+            income = add_income()
+        elif choice == "2":
+            add_expense(expenses)
+        elif choice == "3":
+            view_expenses(expenses)
+        elif choice == "4":
+            monthly_summary(income, expenses)
+        elif choice == "5":
+            expense_analysis(expenses)
+        elif choice == "6":
+            print("Exiting program... Goodbye")
             break
         else:
-            print('Invalid choice.')
-            print('')
-
-
-budgetHistory = [] 
-
-# Function to get the user's monthly income with input validation
-def getIncome():
-    while True:
-        try:
-            income = float(input("Enter this month income: "))
-            if income <= 0:
-                print("Income must be more than 0")
-                continue
-            return income
-        except ValueError:
-            print("Invalid input, try again.")
-
-# Function to get an expense with its name and amount
-def getExpense():
-    expense_name = input("Enter your expense name: ").strip()
-    while True:
-        try:
-            expense_amt = float(input(f"Enter the amount for '{expense_name}': "))
-            if expense_amt < 0:
-                print("Amount cannot be negative.")
-                continue
-            return {"Name": expense_name, "Amount": expense_amt}
-        except ValueError:
-            print("Invalid input. Please enter a numeric value.")
-
-# Function to add expenses
-def addExpense():
-    expenses = []
-    while True:
-        try:
-            count = int(input("Enter the number of expenses to be added: "))
-            if count <= 0:
-                print("Number must be greater than 0")
-                continue
-            break
-        except ValueError:
-            print("Invalid input.")
-    for i in range(count):
-        expenses.append(getExpense())
-
-    return expenses
-
-# Function to calculate totals
-def calculateTotals(income, expenses):
-    totalExpenses = sum(item["Amount"] for item in expenses)
-    netIncome = income - totalExpenses
-    return totalExpenses, netIncome
-
-# Function to calculate statistics
-def calculateStats(amounts):
-    if len(amounts) == 0:
-        return None
-    stats = {}  
-    stats["mean"] = sum(amounts) / len(amounts)
-    stats["max"] = max(amounts)
-    stats["min"] = min(amounts)
-    stats["count"] = len(amounts)
-    return stats
-
-# Financial analysis
-def analysis(income, totalExpenses, netIncome):
-    print("\nFinancial Analysis")
-    if totalExpenses > income:  
-        print("You are spending more than your income!")
-    elif netIncome > 0:
-        savingsRate = (netIncome / income) * 100
-        print(f"You saved {savingsRate:.2f}% of your income.")
-    else:
-        print("You broke even this month.")
-
-# Display summary
-def displaySummary(income, expenses, total, balance, stats):
-    print("\nMonthly Budget Summary")
-    print(f"Income: {income:.2f}")
-    print("\nExpenses:")
-    for item in expenses:
-        print(f" {item['Name']}: {item['Amount']:.2f}")
-    print(f"\nTotal Expenses: {total:.2f}")
-    print(f"Remaining Balance: {balance:.2f}")
-# stats
-    print("\nStatistics")
-    print(f"Average Expense: {stats['mean']:.2f}")
-    print(f"Highest Expense: {stats['max']:.2f}")
-    print(f"Lowest Expense: {stats['min']:.2f}")
-    print(f"Number of Expenses: {stats['count']}")
-
-# Main budget planner
-def budgetPlanner():
-    print("\nBudget Planner & Expense Analyzer")
-    income = getIncome()
-    expenses = addExpense()
-
-    totalExpenses, netIncome = calculateTotals(income, expenses)
-
-    amounts = [item["Amount"] for item in expenses]
-    stats = calculateStats(amounts)
-
-    displaySummary(income, expenses, totalExpenses, netIncome, stats)
-    analysis(income, totalExpenses, netIncome)
+            print("Invalid choice. Try again.")
 
 # Main function to run the program
 def main():
